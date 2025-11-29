@@ -1,11 +1,12 @@
 import 'package:app_immobilier_mobile/models/models.dart';
+
 import 'package:app_immobilier_mobile/screens/ManagePropertiesPage.dart';
 import 'package:app_immobilier_mobile/screens/FavoritesPage.dart';
 import 'package:app_immobilier_mobile/screens/PaymentPage.dart';
 import 'package:flutter/material.dart';
 
 // 👉 Import des pages
-import 'screens/welcome_page.dart';
+import 'screens/ImprovedWelcomePage.dart';
 import 'screens/home_page.dart';
 import 'screens/login_page.dart';
 import 'screens/register_page.dart';
@@ -25,11 +26,11 @@ class MyApp extends StatelessWidget {
       title: 'Application Immobilier',
 
       // 👉 Page de démarrage
-      home: const WelcomePage(),
+      home: const ImprovedWelcomePage(),
 
       // 👉 Routes déclarées
       routes: {
-        "/welcome": (context) => const WelcomePage(),
+        "/welcome": (context) => const ImprovedWelcomePage(),
         "/home": (context) => const HomePage(),
         "/login": (context) => const LoginPage(),
         "/register": (context) => const RegisterPage(),
@@ -37,7 +38,8 @@ class MyApp extends StatelessWidget {
         "/manageProperties": (context) => const ManagePropertiesPage(),
        "/favorites": (context) => const FavoritesPage(),
       "/payment": (context) => const PaymentPage(),
-
+      
+// La ChatPage se navigue avec des arguments
       },
     );
   }

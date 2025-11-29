@@ -21,17 +21,26 @@ class _PaymentPageState extends State<PaymentPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: const Color(0xFF1A1A1A),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF1B263B),
+        backgroundColor: const Color(0xFF2A2A2A),
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: Color(0xFFFFD700)),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          'Paiement',
-          style: TextStyle(color: Colors.white),
+        title: ShaderMask(
+          shaderCallback: (bounds) => const LinearGradient(
+            colors: [Color(0xFFFFD700), Color(0xFFFFA500)],
+          ).createShader(bounds),
+          child: const Text(
+            'Paiement',
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 22,
+            ),
+          ),
         ),
       ),
       body: SingleChildScrollView(
@@ -40,78 +49,46 @@ class _PaymentPageState extends State<PaymentPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Carte virtuelle
               _buildVirtualCard(),
-              
               const SizedBox(height: 30),
               
-              // Méthodes de paiement
-              const Text(
-                'Méthode de paiement',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+              ShaderMask(
+                shaderCallback: (bounds) => const LinearGradient(
+                  colors: [Color(0xFFFFD700), Color(0xFFFFA500)],
+                ).createShader(bounds),
+                child: const Text(
+                  'Méthode de paiement',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
-              
               const SizedBox(height: 16),
               
-              _buildPaymentMethodOption(
-                'card',
-                'Carte bancaire',
-                Icons.credit_card,
-              ),
-              
+              _buildPaymentMethodOption('card', 'Carte bancaire', Icons.credit_card),
               const SizedBox(height: 12),
-              
-              _buildPaymentMethodOption(
-                'paypal',
-                'PayPal',
-                Icons.account_balance_wallet,
-              ),
-              
+              _buildPaymentMethodOption('paypal', 'PayPal', Icons.account_balance_wallet),
               const SizedBox(height: 12),
-              
-              _buildPaymentMethodOption(
-                'mobile',
-                'Paiement mobile',
-                Icons.phone_android,
-              ),
-              
+              _buildPaymentMethodOption('mobile', 'Paiement mobile', Icons.phone_android),
               const SizedBox(height: 30),
               
-              // Formulaire de carte
               if (_selectedPaymentMethod == 'card') ...[
                 Form(
                   key: _formKey,
                   child: Column(
                     children: [
-                      // Numéro de carte
-                      TextFormField(
+                      _buildTextField(
                         controller: _cardNumberController,
+                        label: 'Numéro de carte',
+                        icon: Icons.credit_card,
                         keyboardType: TextInputType.number,
-                        style: const TextStyle(color: Colors.white),
                         inputFormatters: [
                           FilteringTextInputFormatter.digitsOnly,
                           LengthLimitingTextInputFormatter(16),
                           _CardNumberFormatter(),
                         ],
-                        decoration: InputDecoration(
-                          labelText: 'Numéro de carte',
-                          labelStyle: const TextStyle(color: Color(0xFFB0B8C1)),
-                          prefixIcon: const Icon(Icons.credit_card, color: Color(0xFFD4AF37)),
-                          filled: true,
-                          fillColor: const Color(0xFF1B263B),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide.none,
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: Color(0xFFD4AF37), width: 2),
-                          ),
-                        ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Veuillez entrer le numéro de carte';
@@ -122,29 +99,13 @@ class _PaymentPageState extends State<PaymentPage> {
                           return null;
                         },
                       ),
-                      
                       const SizedBox(height: 16),
                       
-                      // Nom du titulaire
-                      TextFormField(
+                      _buildTextField(
                         controller: _cardHolderController,
-                        style: const TextStyle(color: Colors.white),
+                        label: 'Nom du titulaire',
+                        icon: Icons.person,
                         textCapitalization: TextCapitalization.characters,
-                        decoration: InputDecoration(
-                          labelText: 'Nom du titulaire',
-                          labelStyle: const TextStyle(color: Color(0xFFB0B8C1)),
-                          prefixIcon: const Icon(Icons.person, color: Color(0xFFD4AF37)),
-                          filled: true,
-                          fillColor: const Color(0xFF1B263B),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide.none,
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: Color(0xFFD4AF37), width: 2),
-                          ),
-                        ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Veuillez entrer le nom du titulaire';
@@ -152,37 +113,21 @@ class _PaymentPageState extends State<PaymentPage> {
                           return null;
                         },
                       ),
-                      
                       const SizedBox(height: 16),
                       
-                      // Date d'expiration et CVV
                       Row(
                         children: [
                           Expanded(
-                            child: TextFormField(
+                            child: _buildTextField(
                               controller: _expiryDateController,
+                              label: 'MM/AA',
+                              icon: Icons.calendar_today,
                               keyboardType: TextInputType.number,
-                              style: const TextStyle(color: Colors.white),
                               inputFormatters: [
                                 FilteringTextInputFormatter.digitsOnly,
                                 LengthLimitingTextInputFormatter(4),
                                 _ExpiryDateFormatter(),
                               ],
-                              decoration: InputDecoration(
-                                labelText: 'MM/AA',
-                                labelStyle: const TextStyle(color: Color(0xFFB0B8C1)),
-                                prefixIcon: const Icon(Icons.calendar_today, color: Color(0xFFD4AF37)),
-                                filled: true,
-                                fillColor: const Color(0xFF1B263B),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  borderSide: BorderSide.none,
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  borderSide: const BorderSide(color: Color(0xFFD4AF37), width: 2),
-                                ),
-                              ),
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
                                   return 'Requis';
@@ -196,30 +141,16 @@ class _PaymentPageState extends State<PaymentPage> {
                           ),
                           const SizedBox(width: 16),
                           Expanded(
-                            child: TextFormField(
+                            child: _buildTextField(
                               controller: _cvvController,
-                              keyboardType: TextInputType.number,
+                              label: 'CVV',
+                              icon: Icons.lock,
                               obscureText: true,
-                              style: const TextStyle(color: Colors.white),
+                              keyboardType: TextInputType.number,
                               inputFormatters: [
                                 FilteringTextInputFormatter.digitsOnly,
                                 LengthLimitingTextInputFormatter(3),
                               ],
-                              decoration: InputDecoration(
-                                labelText: 'CVV',
-                                labelStyle: const TextStyle(color: Color(0xFFB0B8C1)),
-                                prefixIcon: const Icon(Icons.lock, color: Color(0xFFD4AF37)),
-                                filled: true,
-                                fillColor: const Color(0xFF1B263B),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  borderSide: BorderSide.none,
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  borderSide: const BorderSide(color: Color(0xFFD4AF37), width: 2),
-                                ),
-                              ),
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
                                   return 'Requis';
@@ -233,22 +164,39 @@ class _PaymentPageState extends State<PaymentPage> {
                           ),
                         ],
                       ),
-                      
                       const SizedBox(height: 20),
                       
-                      // Sauvegarder la carte
                       Row(
                         children: [
-                          Checkbox(
-                            value: _saveCard,
-                            onChanged: (value) {
-                              setState(() => _saveCard = value ?? false);
-                            },
-                            activeColor: const Color(0xFFD4AF37),
+                          Container(
+                            decoration: BoxDecoration(
+                              gradient: _saveCard
+                                  ? const LinearGradient(
+                                      colors: [Color(0xFFFFD700), Color(0xFFFFA500)],
+                                    )
+                                  : null,
+                              border: Border.all(
+                                color: const Color(0xFFFFD700).withOpacity(0.5),
+                              ),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Checkbox(
+                              value: _saveCard,
+                              onChanged: (value) {
+                                setState(() => _saveCard = value ?? false);
+                              },
+                              activeColor: Colors.transparent,
+                              checkColor: Colors.black,
+                              side: BorderSide.none,
+                            ),
                           ),
+                          const SizedBox(width: 12),
                           const Text(
                             'Sauvegarder cette carte',
-                            style: TextStyle(color: Color(0xFFB0B8C1)),
+                            style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 15,
+                            ),
                           ),
                         ],
                       ),
@@ -258,58 +206,40 @@ class _PaymentPageState extends State<PaymentPage> {
               ],
               
               const SizedBox(height: 30),
-              
-              // Résumé du paiement
               _buildPaymentSummary(),
-              
               const SizedBox(height: 30),
               
-              // Bouton de paiement
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    if (_selectedPaymentMethod == 'card') {
-                      if (_formKey.currentState!.validate()) {
-                        _processPayment();
-                      }
-                    } else {
+              _buildPremiumButton(
+                text: 'Payer maintenant',
+                onPressed: () {
+                  if (_selectedPaymentMethod == 'card') {
+                    if (_formKey.currentState!.validate()) {
                       _processPayment();
                     }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFD4AF37),
-                    foregroundColor: Colors.black,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    elevation: 8,
-                  ),
-                  child: const Text(
-                    'Payer maintenant',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
+                  } else {
+                    _processPayment();
+                  }
+                },
               ),
-              
               const SizedBox(height: 20),
               
-              // Sécurité
               Center(
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.lock, color: Color(0xFFB0B8C1), size: 16),
+                    ShaderMask(
+                      shaderCallback: (bounds) => const LinearGradient(
+                        colors: [Color(0xFFFFD700), Color(0xFFFFA500)],
+                      ).createShader(bounds),
+                      child: const Icon(Icons.lock, color: Colors.white, size: 18),
+                    ),
                     const SizedBox(width: 8),
-                    Text(
+                    const Text(
                       'Paiement 100% sécurisé',
                       style: TextStyle(
-                        color: Colors.grey[500],
-                        fontSize: 12,
+                        color: Colors.white54,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ],
@@ -325,28 +255,28 @@ class _PaymentPageState extends State<PaymentPage> {
   Widget _buildVirtualCard() {
     return Container(
       width: double.infinity,
-      height: 200,
+      height: 220,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(24),
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Color(0xFFD4AF37),
-            Color(0xFF8B7355),
-            Color(0xFF1B263B),
+            Color(0xFFFFD700),
+            Color(0xFFFFA500),
+            Color(0xFF2A2A2A),
           ],
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFFD4AF37).withOpacity(0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
+            color: const Color(0xFFFFD700).withOpacity(0.5),
+            blurRadius: 30,
+            offset: const Offset(0, 15),
           ),
         ],
       ),
       child: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(28),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -357,19 +287,19 @@ class _PaymentPageState extends State<PaymentPage> {
                 const Text(
                   'HOUSESTYLE',
                   style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
+                    color: Colors.black,
+                    fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    letterSpacing: 2,
+                    letterSpacing: 3,
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(8),
+                    color: Colors.black.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Icon(Icons.contactless, color: Colors.white),
+                  child: const Icon(Icons.contactless, color: Colors.black, size: 28),
                 ),
               ],
             ),
@@ -378,10 +308,10 @@ class _PaymentPageState extends State<PaymentPage> {
                   ? '**** **** **** ****' 
                   : _cardNumberController.text,
               style: const TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.w500,
-                letterSpacing: 2,
+                color: Colors.black,
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 3,
               ),
             ),
             Row(
@@ -393,18 +323,20 @@ class _PaymentPageState extends State<PaymentPage> {
                     Text(
                       'TITULAIRE',
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.7),
-                        fontSize: 10,
+                        color: Colors.black.withOpacity(0.6),
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
+                    const SizedBox(height: 4),
                     Text(
                       _cardHolderController.text.isEmpty 
                           ? 'VOTRE NOM' 
                           : _cardHolderController.text.toUpperCase(),
                       style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
+                        color: Colors.black,
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ],
@@ -415,18 +347,20 @@ class _PaymentPageState extends State<PaymentPage> {
                     Text(
                       'EXPIRE',
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.7),
-                        fontSize: 10,
+                        color: Colors.black.withOpacity(0.6),
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
+                    const SizedBox(height: 4),
                     Text(
                       _expiryDateController.text.isEmpty 
                           ? 'MM/AA' 
                           : _expiryDateController.text,
                       style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
+                        color: Colors.black,
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ],
@@ -442,22 +376,51 @@ class _PaymentPageState extends State<PaymentPage> {
   Widget _buildPaymentMethodOption(String value, String title, IconData icon) {
     final isSelected = _selectedPaymentMethod == value;
     return GestureDetector(
-      onTap: () {
-        setState(() => _selectedPaymentMethod = value);
-      },
+      onTap: () => setState(() => _selectedPaymentMethod = value),
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
-          color: const Color(0xFF1B263B),
-          borderRadius: BorderRadius.circular(12),
+          color: const Color(0xFF2A2A2A),
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected ? const Color(0xFFD4AF37) : const Color(0xFF2C3E50),
-            width: 2,
+            color: isSelected 
+                ? const Color(0xFFFFD700) 
+                : const Color(0xFFFFD700).withOpacity(0.3),
+            width: isSelected ? 2 : 1,
           ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: const Color(0xFFFFD700).withOpacity(0.3),
+                    blurRadius: 15,
+                    offset: const Offset(0, 4),
+                  ),
+                ]
+              : [],
         ),
         child: Row(
           children: [
-            Icon(icon, color: const Color(0xFFD4AF37)),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                gradient: isSelected
+                    ? const LinearGradient(
+                        colors: [Color(0xFFFFD700), Color(0xFFFFA500)],
+                      )
+                    : LinearGradient(
+                        colors: [
+                          const Color(0xFFFFD700).withOpacity(0.2),
+                          const Color(0xFFFFA500).withOpacity(0.2),
+                        ],
+                      ),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                icon,
+                color: isSelected ? Colors.black : const Color(0xFFFFD700),
+                size: 24,
+              ),
+            ),
             const SizedBox(width: 16),
             Expanded(
               child: Text(
@@ -465,13 +428,71 @@ class _PaymentPageState extends State<PaymentPage> {
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 16,
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ),
             if (isSelected)
-              const Icon(Icons.check_circle, color: Color(0xFFD4AF37)),
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Color(0xFFFFD700), Color(0xFFFFA500)],
+                  ),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.check, color: Colors.black, size: 18),
+              ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    TextInputType? keyboardType,
+    bool obscureText = false,
+    List<TextInputFormatter>? inputFormatters,
+    TextCapitalization textCapitalization = TextCapitalization.none,
+    String? Function(String?)? validator,
+  }) {
+    return TextFormField(
+      controller: controller,
+      keyboardType: keyboardType,
+      obscureText: obscureText,
+      style: const TextStyle(color: Colors.white, fontSize: 16),
+      inputFormatters: inputFormatters,
+      textCapitalization: textCapitalization,
+      validator: validator,
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: const TextStyle(color: Colors.white54),
+        prefixIcon: ShaderMask(
+          shaderCallback: (bounds) => const LinearGradient(
+            colors: [Color(0xFFFFD700), Color(0xFFFFA500)],
+          ).createShader(bounds),
+          child: Icon(icon, color: Colors.white),
+        ),
+        filled: true,
+        fillColor: const Color(0xFF2A2A2A),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: const Color(0xFFFFD700).withOpacity(0.3)),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: const Color(0xFFFFD700).withOpacity(0.3)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFFFFD700), width: 2),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.red),
         ),
       ),
     );
@@ -479,24 +500,41 @@ class _PaymentPageState extends State<PaymentPage> {
 
   Widget _buildPaymentSummary() {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: const Color(0xFF1B263B),
-        borderRadius: BorderRadius.circular(12),
+        color: const Color(0xFF2A2A2A),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: const Color(0xFFFFD700).withOpacity(0.3),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFFFFD700).withOpacity(0.1),
+            blurRadius: 20,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         children: [
           _buildSummaryRow('Sous-total', '450 000 DT'),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           _buildSummaryRow('Frais de service', '5 000 DT'),
-          const SizedBox(height: 12),
-          const Divider(color: Color(0xFF2C3E50)),
-          const SizedBox(height: 12),
-          _buildSummaryRow(
-            'Total',
-            '455 000 DT',
-            isTotal: true,
+          const SizedBox(height: 16),
+          Container(
+            height: 1,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Colors.transparent,
+                  const Color(0xFFFFD700).withOpacity(0.5),
+                  Colors.transparent,
+                ],
+              ),
+            ),
           ),
+          const SizedBox(height: 16),
+          _buildSummaryRow('Total', '455 000 DT', isTotal: true),
         ],
       ),
     );
@@ -509,20 +547,66 @@ class _PaymentPageState extends State<PaymentPage> {
         Text(
           label,
           style: TextStyle(
-            color: isTotal ? Colors.white : const Color(0xFFB0B8C1),
+            color: isTotal ? Colors.white : Colors.white70,
             fontSize: isTotal ? 18 : 16,
             fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
           ),
         ),
-        Text(
-          amount,
-          style: TextStyle(
-            color: isTotal ? const Color(0xFFD4AF37) : Colors.white,
-            fontSize: isTotal ? 20 : 16,
-            fontWeight: FontWeight.bold,
+        ShaderMask(
+          shaderCallback: (bounds) => isTotal
+              ? const LinearGradient(
+                  colors: [Color(0xFFFFD700), Color(0xFFFFA500)],
+                ).createShader(bounds)
+              : const LinearGradient(colors: [Colors.white, Colors.white])
+                  .createShader(bounds),
+          child: Text(
+            amount,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: isTotal ? 22 : 16,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildPremiumButton({required String text, required VoidCallback onPressed}) {
+    return Container(
+      width: double.infinity,
+      height: 56,
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFFFFD700), Color(0xFFFFA500)],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFFFFD700).withOpacity(0.5),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.transparent,
+          shadowColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+        ),
+        child: Text(
+          text,
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
+        ),
+      ),
     );
   }
 
@@ -530,20 +614,67 @@ class _PaymentPageState extends State<PaymentPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1B263B),
-        title: const Icon(Icons.check_circle, color: Color(0xFFD4AF37), size: 60),
-        content: const Text(
-          'Paiement effectué avec succès !',
-          textAlign: TextAlign.center,
-          style: TextStyle(color: Colors.white, fontSize: 18),
+        backgroundColor: const Color(0xFF2A2A2A),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFFFFD700), Color(0xFFFFA500)],
+                ),
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFFFFD700).withOpacity(0.5),
+                    blurRadius: 20,
+                  ),
+                ],
+              ),
+              child: const Icon(Icons.check, color: Colors.black, size: 50),
+            ),
+            const SizedBox(height: 24),
+            const Text(
+              'Paiement effectué !',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              'Votre transaction a été validée avec succès',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.white70, fontSize: 15),
+            ),
+          ],
         ),
         actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              Navigator.pop(context);
-            },
-            child: const Text('OK', style: TextStyle(color: Color(0xFFD4AF37))),
+          Container(
+            width: double.infinity,
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFFFFD700), Color(0xFFFFA500)],
+              ),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                Navigator.pop(context);
+              },
+              child: const Text(
+                'OK',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
+            ),
           ),
         ],
       ),
@@ -560,7 +691,6 @@ class _PaymentPageState extends State<PaymentPage> {
   }
 }
 
-// Formatter pour le numéro de carte
 class _CardNumberFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(
@@ -584,7 +714,6 @@ class _CardNumberFormatter extends TextInputFormatter {
   }
 }
 
-// Formatter pour la date d'expiration
 class _ExpiryDateFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(
