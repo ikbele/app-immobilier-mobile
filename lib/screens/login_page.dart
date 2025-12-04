@@ -32,7 +32,7 @@ class _LoginPageState extends State<LoginPage> {
     setState(() => _isLoading = true);
 
     try {
-      await account.createEmailSession(
+      await account.createEmailPasswordSession(
         email: _emailController.text.trim(),
         password: _passwordController.text,
       );

@@ -11,6 +11,7 @@ class RegisterPage extends StatefulWidget {
 class _RegisterPageState extends State<RegisterPage> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
+  final _prenomController = TextEditingController(); // Ajout du prénom
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
@@ -38,34 +39,36 @@ class _RegisterPageState extends State<RegisterPage> {
     setState(() => _isLoading = true);
 
     try {
+      // Créer l'utilisateur dans Appwrite Auth
       final user = await account.create(
         userId: ID.unique(),
         email: _emailController.text.trim(),
         password: _passwordController.text,
-        name: _nameController.text.trim(),
+        name: '${_prenomController.text.trim()} ${_nameController.text.trim()}', // Prénom + Nom
       );
 
-      await account.createEmailSession(
+      // Créer la session
+      await account.createEmailPasswordSession(
         email: _emailController.text.trim(),
         password: _passwordController.text,
       );
 
-      if (_phoneController.text.trim().isNotEmpty) {
-        try {
-          await databases.createDocument(
-            databaseId: '6929e1e300094da69676',
-            collectionId: 'users',
-            documentId: user.$id,
-            data: {
-              'userId': user.$id,
-              'phone': _phoneController.text.trim(),
-              'email': _emailController.text.trim(),
-              'name': _nameController.text.trim(),
-            },
-          );
-        } catch (e) {
-          print('Error saving phone: $e');
-        }
+      // Sauvegarder les infos supplémentaires dans la collection users
+      try {
+        await databases.createDocument(
+          databaseId: '6929e1e300094da69676',
+          collectionId: 'users',
+          documentId: user.$id, // Utiliser l'ID utilisateur comme ID du document
+          data: {
+            'userId': user.$id,
+            'name': _nameController.text.trim(),
+            'prenom': _prenomController.text.trim(),
+            'email': _emailController.text.trim(),
+            'phone': _phoneController.text.trim(),
+          },
+        );
+      } catch (e) {
+        print('Error saving user data: $e');
       }
 
       if (mounted) {
@@ -81,7 +84,7 @@ class _RegisterPageState extends State<RegisterPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(e.message ?? 'Erreur'),
+            content: Text(e.message ?? 'Erreur lors de l\'inscription'),
             backgroundColor: Colors.red,
           ),
         );
@@ -173,11 +176,13 @@ class _RegisterPageState extends State<RegisterPage> {
 
                     const SizedBox(height: 30),
 
-                    _buildTextField(_nameController, 'Nom complet', Icons.person),
+                    _buildTextField(_prenomController, 'Prénom', Icons.person_outline),
+                    const SizedBox(height: 16),
+                    _buildTextField(_nameController, 'Nom', Icons.person),
                     const SizedBox(height: 16),
                     _buildTextField(_emailController, 'Email', Icons.email, isEmail: true),
                     const SizedBox(height: 16),
-                    _buildTextField(_phoneController, 'Téléphone', Icons.phone, isPhone: true),
+                    _buildTextField(_phoneController, 'Téléphone (optionnel)', Icons.phone, isPhone: true, isRequired: false),
                     const SizedBox(height: 16),
                     _buildPasswordField(_passwordController, 'Mot de passe', _obscurePassword, () {
                       setState(() => _obscurePassword = !_obscurePassword);
@@ -270,11 +275,19 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, String label, IconData icon, 
-      {bool isEmail = false, bool isPhone = false}) {
+  Widget _buildTextField(
+    TextEditingController controller,
+    String label,
+    IconData icon, {
+    bool isEmail = false,
+    bool isPhone = false,
+    bool isRequired = true,
+  }) {
     return TextFormField(
       controller: controller,
-      keyboardType: isEmail ? TextInputType.emailAddress : (isPhone ? TextInputType.phone : TextInputType.text),
+      keyboardType: isEmail
+          ? TextInputType.emailAddress
+          : (isPhone ? TextInputType.phone : TextInputType.text),
       style: const TextStyle(color: Colors.white),
       decoration: InputDecoration(
         labelText: label,
@@ -296,14 +309,22 @@ class _RegisterPageState extends State<RegisterPage> {
         ),
       ),
       validator: (value) {
-        if (value == null || value.isEmpty) return 'Requis';
-        if (isEmail && !value.contains('@')) return 'Email invalide';
+        if (isRequired && (value == null || value.isEmpty)) return 'Requis';
+        if (isEmail && value != null && value.isNotEmpty && !value.contains('@')) {
+          return 'Email invalide';
+        }
         return null;
       },
     );
   }
 
-  Widget _buildPasswordField(TextEditingController controller, String label, bool obscure, VoidCallback onToggle, {bool isConfirm = false}) {
+  Widget _buildPasswordField(
+    TextEditingController controller,
+    String label,
+    bool obscure,
+    VoidCallback onToggle, {
+    bool isConfirm = false,
+  }) {
     return TextFormField(
       controller: controller,
       obscureText: obscure,
@@ -311,9 +332,15 @@ class _RegisterPageState extends State<RegisterPage> {
       decoration: InputDecoration(
         labelText: label,
         labelStyle: const TextStyle(color: Color(0xFFB0B8C1)),
-        prefixIcon: Icon(isConfirm ? Icons.lock_outline : Icons.lock, color: const Color(0xFFFFD700)),
+        prefixIcon: Icon(
+          isConfirm ? Icons.lock_outline : Icons.lock,
+          color: const Color(0xFFFFD700),
+        ),
         suffixIcon: IconButton(
-          icon: Icon(obscure ? Icons.visibility_off : Icons.visibility, color: const Color(0xFFFFD700)),
+          icon: Icon(
+            obscure ? Icons.visibility_off : Icons.visibility,
+            color: const Color(0xFFFFD700),
+          ),
           onPressed: onToggle,
         ),
         filled: true,
@@ -334,7 +361,9 @@ class _RegisterPageState extends State<RegisterPage> {
       validator: (value) {
         if (value == null || value.isEmpty) return 'Requis';
         if (!isConfirm && value.length < 8) return 'Min 8 caractères';
-        if (isConfirm && value != _passwordController.text) return 'Non identique';
+        if (isConfirm && value != _passwordController.text) {
+          return 'Mots de passe non identiques';
+        }
         return null;
       },
     );
@@ -343,6 +372,7 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   void dispose() {
     _nameController.dispose();
+    _prenomController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
