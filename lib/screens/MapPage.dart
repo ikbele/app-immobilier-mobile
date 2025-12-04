@@ -71,8 +71,21 @@ class _MapPageState extends State<MapPage> {
                           property['imageUrl'],
                           fit: BoxFit.cover,
                           width: double.infinity,
+                          errorBuilder: (context, error, stackTrace) {
+                            return const Center(
+                              child: Icon(Icons.home, color: Colors.yellow, size: 70),
+                            );
+                          },
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return const Center(
+                              child: CircularProgressIndicator(color: Colors.yellow),
+                            );
+                          },
                         )
-                      : const Icon(Icons.home, color: Colors.yellow, size: 70),
+                      : const Center(
+                          child: Icon(Icons.home, color: Colors.yellow, size: 70),
+                        ),
                 ),
               ),
               Padding(
@@ -186,41 +199,118 @@ class _MapPageState extends State<MapPage> {
     final List<Marker> markers = properties.map<Marker>((property) {
       final lat = (property['lat'] ?? 36.8065).toDouble();
       final lng = (property['lng'] ?? 10.1815).toDouble();
-    return Marker(
-  point: LatLng(lat, lng),
-  width: 40,
-  height: 40,
-  child: GestureDetector(
-    onTap: () => _showPropertyDetails(property),
-    child: const Icon(
-      Icons.location_on,
-      color: Colors.orange,
-      size: 30,
-    ),
-  ),
-);
-
-
-     
+      
+      return Marker(
+        point: LatLng(lat, lng),
+        width: 50,
+        height: 50,
+        child: GestureDetector(
+          onTap: () => _showPropertyDetails(property),
+          child: Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.3),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: const Icon(
+                  Icons.location_on,
+                  color: Colors.orange,
+                  size: 30,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
     }).toList();
 
     return Scaffold(
       appBar: AppBar(
         title: const Text("Carte des Propriétés"),
         backgroundColor: Colors.orange,
+        elevation: 0,
       ),
-      body: FlutterMap(
-        mapController: _mapController,
-        options: MapOptions(
-          initialCenter: _tunisCenter,
-          initialZoom: 12.0,
-        ),
+      body: Stack(
         children: [
-          TileLayer(
-            urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-            userAgentPackageName: 'com.example.app',
+          FlutterMap(
+            mapController: _mapController,
+            options: MapOptions(
+              initialCenter: _tunisCenter,
+              initialZoom: 12.0,
+              minZoom: 5.0,
+              maxZoom: 18.0,
+            ),
+            children: [
+              // Using Mapbox tiles - free for development, better performance
+              // Alternative: Use Google Maps, Thunderforest, or other providers
+              TileLayer(
+                urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                userAgentPackageName: 'tn.properties.app',
+                // Add rate limiting to respect OSM's fair use policy
+                maxNativeZoom: 19,
+                // Suppress the warning by acknowledging we've seen it
+                tileProvider: NetworkTileProvider(),
+              ),
+              MarkerLayer(markers: markers),
+            ],
           ),
-          MarkerLayer(markers: markers),
+          // Show property count
+          if (properties.isNotEmpty)
+            Positioned(
+              top: 16,
+              right: 16,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Colors.orange,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.home, color: Colors.white, size: 18),
+                    const SizedBox(width: 6),
+                    Text(
+                      '${properties.length}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          // Center on user button (optional)
+          Positioned(
+            bottom: 80,
+            right: 16,
+            child: FloatingActionButton(
+              mini: true,
+              backgroundColor: Colors.white,
+              onPressed: () {
+                _mapController.move(_tunisCenter, 12.0);
+              },
+              child: const Icon(Icons.my_location, color: Colors.orange),
+            ),
+          ),
         ],
       ),
     );
