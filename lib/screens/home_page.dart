@@ -20,6 +20,9 @@ class _HomePageState extends State<HomePage> {
   Set<String> favoritePropertyIds = {};
   bool _isLoading = true;
 
+  // 🌓 Mode sombre/clair
+  bool _isDarkMode = true;
+
   // 🔍 Contrôleurs de recherche et filtres
   final TextEditingController _searchController = TextEditingController();
   String _selectedTypeFilter = 'Tous';
@@ -28,6 +31,13 @@ class _HomePageState extends State<HomePage> {
   RangeValues _priceRange = const RangeValues(0, 1000000);
 
   final List<String> _propertyTypes = ['Tous', 'Villa', 'Appartement', 'Maison', 'Studio', 'Penthouse'];
+
+  // 🎨 Couleurs dynamiques selon le thème
+  Color get _backgroundColor => _isDarkMode ? const Color(0xFF1A1A1A) : Colors.white;
+  Color get _cardColor => _isDarkMode ? const Color(0xFF2A2A2A) : const Color(0xFFF5F5F5);
+  Color get _textColor => _isDarkMode ? Colors.white : Colors.black87;
+  Color get _textSecondaryColor => _isDarkMode ? Colors.white70 : Colors.black54;
+  Color get _borderColor => _isDarkMode ? const Color(0xFFFFD700).withOpacity(0.3) : const Color(0xFFFFD700).withOpacity(0.2);
 
   @override
   void initState() {
@@ -124,9 +134,9 @@ class _HomePageState extends State<HomePage> {
       builder: (context) => StatefulBuilder(
         builder: (context, setModalState) => Container(
           height: MediaQuery.of(context).size.height * 0.6,
-          decoration: const BoxDecoration(
-            color: Color(0xFF2A2A2A),
-            borderRadius: BorderRadius.only(
+          decoration: BoxDecoration(
+            color: _cardColor,
+            borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(20),
               topRight: Radius.circular(20),
             ),
@@ -146,18 +156,18 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
               const SizedBox(height: 20),
-              const Text(
+              Text(
                 'Filtres avancés',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: _textColor,
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 20),
-              const Text(
+              Text(
                 'Type de propriété',
-                style: TextStyle(color: Colors.white70, fontSize: 14),
+                style: TextStyle(color: _textSecondaryColor, fontSize: 14),
               ),
               const SizedBox(height: 10),
               Wrap(
@@ -173,18 +183,18 @@ class _HomePageState extends State<HomePage> {
                       });
                     },
                     selectedColor: const Color(0xFFFFD700),
-                    backgroundColor: const Color(0xFF3A3A3A),
+                    backgroundColor: _isDarkMode ? const Color(0xFF3A3A3A) : Colors.grey[300],
                     labelStyle: TextStyle(
-                      color: isSelected ? Colors.black : Colors.white,
+                      color: isSelected ? Colors.black : _textColor,
                       fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                     ),
                   );
                 }).toList(),
               ),
               const SizedBox(height: 20),
-              const Text(
+              Text(
                 'Fourchette de prix',
-                style: TextStyle(color: Colors.white70, fontSize: 14),
+                style: TextStyle(color: _textSecondaryColor, fontSize: 14),
               ),
               const SizedBox(height: 10),
               RangeSlider(
@@ -193,7 +203,7 @@ class _HomePageState extends State<HomePage> {
                 max: _maxPrice,
                 divisions: 20,
                 activeColor: const Color(0xFFFFD700),
-                inactiveColor: const Color(0xFF3A3A3A),
+                inactiveColor: _isDarkMode ? const Color(0xFF3A3A3A) : Colors.grey[300],
                 labels: RangeLabels(
                   '${_priceRange.start.toInt()} DT',
                   '${_priceRange.end.toInt()} DT',
@@ -332,11 +342,26 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  void _showLoginRequiredMessage(String feature) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Connectez-vous pour accéder à $feature'),
+        backgroundColor: const Color(0xFFFFA500),
+        duration: const Duration(seconds: 4),
+        action: SnackBarAction(
+          label: 'Se connecter',
+          textColor: const Color(0xFF1A1A1A),
+          onPressed: () => Navigator.pushNamed(context, '/login'),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
       return Scaffold(
-        backgroundColor: const Color(0xFF1A1A1A),
+        backgroundColor: _backgroundColor,
         body: const Center(
           child: CircularProgressIndicator(color: Color(0xFFFFD700)),
         ),
@@ -344,23 +369,36 @@ class _HomePageState extends State<HomePage> {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFF1A1A1A),
+      backgroundColor: _backgroundColor,
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: const Color(0xFF2A2A2A),
+        backgroundColor: _cardColor,
         title: ShaderMask(
           shaderCallback: (bounds) => const LinearGradient(
             colors: [Color(0xFFFFD700), Color(0xFFFFA500)],
           ).createShader(bounds),
-          child: const Text(
+          child: Text(
             "Biens Premium",
             style: TextStyle(
-              color: Colors.white,
+              color: _textColor,
               fontWeight: FontWeight.bold,
             ),
           ),
         ),
         actions: [
+          // 🌓 Bouton Mode Nuit/Jour
+          IconButton(
+            icon: Icon(
+              _isDarkMode ? Icons.light_mode : Icons.dark_mode,
+              color: const Color(0xFFFFD700),
+            ),
+            onPressed: () {
+              setState(() {
+                _isDarkMode = !_isDarkMode;
+              });
+            },
+            tooltip: _isDarkMode ? 'Mode Jour' : 'Mode Nuit',
+          ),
           IconButton(
             icon: const Icon(Icons.map, color: Color(0xFFFFD700)),
             onPressed: () {
@@ -369,21 +407,6 @@ class _HomePageState extends State<HomePage> {
                 '/map',
                 arguments: filteredProducts,
               );
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.chat_bubble_outline, color: Color(0xFFFFD700)),
-            onPressed: () {
-              if (userId == null) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Connectez-vous pour accéder aux messages'),
-                    backgroundColor: Color(0xFFFFA500),
-                  ),
-                );
-              } else {
-                Navigator.pushNamed(context, '/conversations');
-              }
             },
           ),
           IconButton(
@@ -405,7 +428,7 @@ class _HomePageState extends State<HomePage> {
             ),
         ],
       ),
-      body: _currentIndex == 0 ? _buildHomeContent() : _buildOtherPages(),
+      body: _buildHomeContent(),
       floatingActionButton: userId != null
           ? FloatingActionButton(
               onPressed: () async {
@@ -423,28 +446,24 @@ class _HomePageState extends State<HomePage> {
         currentIndex: _currentIndex,
         selectedItemColor: const Color(0xFFFFD700),
         unselectedItemColor: Colors.grey,
-        backgroundColor: const Color(0xFF2A2A2A),
+        backgroundColor: _cardColor,
         type: BottomNavigationBarType.fixed,
         onTap: (index) {
-          if (index == 2) {
+          if (index == 1) {
             if (userId == null) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Connectez-vous'),
-                  backgroundColor: Color(0xFFFFA500),
-                ),
-              );
+              _showLoginRequiredMessage('vos favoris');
             } else {
               Navigator.pushNamed(context, "/favorites");
             }
+          } else if (index == 2) {
+            if (userId == null) {
+              _showLoginRequiredMessage('vos messages');
+            } else {
+              Navigator.pushNamed(context, '/conversations');
+            }
           } else if (index == 3) {
             if (userId == null) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Connectez-vous'),
-                  backgroundColor: Color(0xFFFFA500),
-                ),
-              );
+              _showLoginRequiredMessage('votre profil');
             } else {
               Navigator.pushNamed(context, "/profile");
             }
@@ -454,8 +473,8 @@ class _HomePageState extends State<HomePage> {
         },
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: "Accueil"),
-          BottomNavigationBarItem(icon: Icon(Icons.shopping_cart), label: "Panier"),
           BottomNavigationBarItem(icon: Icon(Icons.favorite), label: "Favoris"),
+          BottomNavigationBarItem(icon: Icon(Icons.chat_bubble_outline), label: "Messages"),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profil"),
         ],
       ),
@@ -467,19 +486,19 @@ class _HomePageState extends State<HomePage> {
       children: [
         Container(
           padding: const EdgeInsets.all(16),
-          color: const Color(0xFF2A2A2A),
+          color: _cardColor,
           child: Row(
             children: [
               Expanded(
                 child: TextField(
                   controller: _searchController,
-                  style: const TextStyle(color: Colors.white),
+                  style: TextStyle(color: _textColor),
                   decoration: InputDecoration(
                     hintText: 'Rechercher une propriété...',
-                    hintStyle: const TextStyle(color: Colors.white54),
+                    hintStyle: TextStyle(color: _textSecondaryColor),
                     prefixIcon: const Icon(Icons.search, color: Color(0xFFFFD700)),
                     filled: true,
-                    fillColor: const Color(0xFF1A1A1A),
+                    fillColor: _backgroundColor,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide.none,
@@ -510,7 +529,7 @@ class _HomePageState extends State<HomePage> {
             children: [
               Text(
                 '${filteredProducts.length} propriété${filteredProducts.length > 1 ? 's' : ''} trouvée${filteredProducts.length > 1 ? 's' : ''}',
-                style: const TextStyle(color: Colors.white70, fontSize: 14),
+                style: TextStyle(color: _textSecondaryColor, fontSize: 14),
               ),
               if (_selectedTypeFilter != 'Tous' || _priceRange.start != _minPrice || _priceRange.end != _maxPrice)
                 TextButton.icon(
@@ -533,10 +552,10 @@ class _HomePageState extends State<HomePage> {
         ),
         Expanded(
           child: filteredProducts.isEmpty
-              ? const Center(
+              ? Center(
                   child: Text(
                     "Aucune propriété trouvée",
-                    style: TextStyle(color: Colors.white, fontSize: 18),
+                    style: TextStyle(color: _textColor, fontSize: 18),
                   ),
                 )
               : GridView.builder(
@@ -567,9 +586,9 @@ class _HomePageState extends State<HomePage> {
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       builder: (context) => Container(
-        decoration: const BoxDecoration(
-          color: Color(0xFF2A2A2A),
-          borderRadius: BorderRadius.only(
+        decoration: BoxDecoration(
+          color: _cardColor,
+          borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(20),
             topRight: Radius.circular(20),
           ),
@@ -620,10 +639,10 @@ class _HomePageState extends State<HomePage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('Propriétaire', style: TextStyle(color: Colors.grey, fontSize: 12)),
+                          Text('Propriétaire', style: TextStyle(color: _isDarkMode ? Colors.grey : Colors.grey[600], fontSize: 12)),
                           Text(
                             product['ownerName'] ?? 'Inconnu',
-                            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                            style: TextStyle(color: _textColor, fontWeight: FontWeight.bold, fontSize: 16),
                           ),
                           if (product['ownerEmail'] != null && product['ownerEmail'].toString().isNotEmpty)
                             Text(
@@ -645,14 +664,14 @@ class _HomePageState extends State<HomePage> {
                 ),
                 child: const Icon(Icons.visibility, color: Color(0xFF1A1A1A)),
               ),
-              title: const Text('Voir les détails', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              title: Text('Voir les détails', style: TextStyle(color: _textColor, fontWeight: FontWeight.bold)),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.pushNamed(context, '/propertyDetail', arguments: product);
               },
             ),
             if (product['lat'] != null && product['lng'] != null) ...[
-              const Divider(color: Color(0xFF3A3A3A)),
+              Divider(color: _isDarkMode ? const Color(0xFF3A3A3A) : Colors.grey[300]),
               ListTile(
                 leading: Container(
                   padding: const EdgeInsets.all(10),
@@ -662,10 +681,10 @@ class _HomePageState extends State<HomePage> {
                   ),
                   child: const Icon(Icons.location_on, color: Color(0xFF1A1A1A)),
                 ),
-                title: const Text('Voir sur la carte', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                title: Text('Voir sur la carte', style: TextStyle(color: _textColor, fontWeight: FontWeight.bold)),
                 subtitle: Text(
                   product['localisation'] ?? 'Localisation',
-                  style: const TextStyle(color: Colors.grey, fontSize: 12),
+                  style: TextStyle(color: _isDarkMode ? Colors.grey : Colors.grey[600], fontSize: 12),
                 ),
                 onTap: () {
                   Navigator.pop(context);
@@ -678,7 +697,7 @@ class _HomePageState extends State<HomePage> {
               ),
             ],
             if (userId != null) ...[
-              const Divider(color: Color(0xFF3A3A3A)),
+              Divider(color: _isDarkMode ? const Color(0xFF3A3A3A) : Colors.grey[300]),
               ListTile(
                 leading: Container(
                   padding: const EdgeInsets.all(10),
@@ -688,7 +707,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                   child: const Icon(Icons.chat_bubble, color: Color(0xFF1A1A1A)),
                 ),
-                title: const Text('Contacter le propriétaire', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                title: Text('Contacter le propriétaire', style: TextStyle(color: _textColor, fontWeight: FontWeight.bold)),
                 onTap: () {
                   Navigator.pop(context);
                   Navigator.pushNamed(
@@ -711,9 +730,9 @@ class _HomePageState extends State<HomePage> {
   Widget _buildPropertyCard(Map<String, dynamic> product) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF2A2A2A),
+        color: _cardColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFFFD700).withOpacity(0.3)),
+        border: Border.all(color: _borderColor),
         boxShadow: [
           BoxShadow(
             color: const Color(0xFFFFD700).withOpacity(0.1),
@@ -740,7 +759,7 @@ class _HomePageState extends State<HomePage> {
                   errorBuilder: (context, error, stackTrace) {
                     return Container(
                       height: 120,
-                      color: const Color(0xFF3A3A3A),
+                      color: _isDarkMode ? const Color(0xFF3A3A3A) : Colors.grey[300],
                       child: const Icon(Icons.home, size: 40, color: Color(0xFFFFD700)),
                     );
                   },
@@ -786,7 +805,7 @@ class _HomePageState extends State<HomePage> {
                 children: [
                   Text(
                     product['title'] ?? 'Sans titre',
-                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: _textColor),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -808,11 +827,11 @@ class _HomePageState extends State<HomePage> {
                           },
                           child: Text(
                             product['localisation'] ?? '',
-                            style: const TextStyle(
-                              color: Colors.grey,
+                            style: TextStyle(
+                              color: _isDarkMode ? Colors.grey : Colors.grey[600],
                               fontSize: 11,
                               decoration: TextDecoration.underline,
-                              decorationColor: Colors.grey,
+                              decorationColor: _isDarkMode ? Colors.grey : Colors.grey[600],
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -837,7 +856,7 @@ class _HomePageState extends State<HomePage> {
                           const SizedBox(width: 4),
                           Flexible(
                             child: Text(
-                             product['ownerName'],
+                              product['ownerName'],
                               style: const TextStyle(
                                 color: Color(0xFFFFD700),
                                 fontSize: 10,
@@ -862,15 +881,9 @@ class _HomePageState extends State<HomePage> {
                 ],
               ),
             ),
-          )
+          ),
         ],
       ),
-    );
-  }
-
-  Widget _buildOtherPages() {
-    return const Center(
-      child: Text("Panier", style: TextStyle(color: Colors.white, fontSize: 18)),
     );
   }
 
