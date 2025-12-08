@@ -6,6 +6,7 @@
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 Application mobile **cross-platform** (iOS & Android) pour la recherche, consultation et publication d'annonces immobilières, développée avec **Flutter** et **Appwrite**.
+<img width="540" height="1200" alt="image" src="https://github.com/user-attachments/assets/fa4b8015-7825-43fb-acef-4bacf09df9de" />
 
 <p align="center">
   <img src="docs/assets/screenshots/app-preview.png" alt="App Preview" width="800">
