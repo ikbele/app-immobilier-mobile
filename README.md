@@ -7,6 +7,22 @@
 
 Application mobile **cross-platform** (iOS & Android) pour la recherche, consultation et publication d'annonces immobilières, développée avec **Flutter** et **Appwrite**.
 <img width="540" height="1200" alt="image" src="https://github.com/user-attachments/assets/fa4b8015-7825-43fb-acef-4bacf09df9de" />
+<img width="540" height="1200" alt="image" src="https://github.com/user-attachments/assets/b4f5204a-2a36-459a-8030-f938f69568b3" />
+<img width="540" height="1200" alt="image" src="https://github.com/user-attachments/assets/b6c5736a-79a6-40aa-9726-782fa02e4b51" />
+<img width="540" height="1200" alt="image" src="https://github.com/user-attachments/assets/62179289-37df-4cf8-b89d-658baf593945" />
+<img width="540" height="1200" alt="image" src="https://github.com/user-attachments/assets/e460e984-1ba8-495a-ac13-8e567edf6d57" />
+<img width="540" height="1200" alt="image" src="https://github.com/user-attachments/assets/1af8bd5f-2e64-47f6-8965-3c378bcd0df9" />
+<img width="540" height="1200" alt="image" src="https://github.com/user-attachments/assets/3c098cf1-1a2e-4660-bc3b-1d4e3d38496b" />
+<img width="540" height="1200" alt="image" src="https://github.com/user-attachments/assets/143588e4-563e-4f3b-841c-5aab91f112b5" />
+<img width="540" height="1200" alt="image" src="https://github.com/user-attachments/assets/97c0b660-c124-4ecd-bff4-016e02d3dd87" />
+<img width="540" height="1200" alt="image" src="https://github.com/user-attachments/assets/cd7d10b8-b0f2-424b-8796-23d3f5120978" />
+<img width="540" height="1200" alt="image" src="https://github.com/user-attachments/assets/05b6ff18-08fa-4af8-9565-d343ac8a6399" />
+<img width="540" height="1200" alt="image" src="https://github.com/user-attachments/assets/d5d313e1-d29e-40c1-b0ec-d2b5cd7d117e" />
+<img width="540" height="1200" alt="image" src="https://github.com/user-attachments/assets/ac9e3478-3d23-45d8-9e86-9ee33c195eb6" />
+<img width="540" height="1200" alt="image" src="https://github.com/user-attachments/assets/73ce2db5-5436-4312-b4f6-f74f8f082211" />
+<img width="540" height="1200" alt="image" src="https://github.com/user-attachments/assets/1e0fdb04-79ee-4031-a6df-7d98a1dec296" />
+<img width="540" height="1200" alt="image" src="https://github.com/user-attachments/assets/19d441a3-7aea-405d-8646-9fe6d627f553" />
+
 
 <p align="center">
   <img src="docs/assets/screenshots/app-preview.png" alt="App Preview" width="800">
